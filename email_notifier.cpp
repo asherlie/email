@@ -14,6 +14,7 @@
  */
 
 std::string auth_filename = "auth.txt";
+//bool use_auth_file = true;
 struct notification_message{
 	notification_message() : subject(""), message(""){} 
 	std::string email_from_username;
@@ -71,8 +72,8 @@ std::string build_MIME(std::string subject, std::string message, std::string att
 	return contents;
 }
 
-int notify(notification_message& nm){
-	if(file_exists(auth_filename)){
+int notify(notification_message& nm, bool use_auth_file){
+	if(file_exists(auth_filename) && use_auth_file){
 		std::string* auth_i = get_auth_info();
 		nm.email_from_username = auth_i[0];
 		nm.email_from_password = auth_i[1];
