@@ -52,6 +52,13 @@ int main(int argc, char* argv[]){
 			return ret;
 		}
 	}
+	if((auth_filename == "" || !file_exists(auth_filename)) && (nm.email_from_username == "" || nm.email_from_password == "")){ // auth filename will never be "", initialized to auth.txt
+		std::cout << "enter username" << std::endl;
+		std::getline(std::cin, nm.email_from_username);
+
+		std::cout << "\nenter password" << std::endl;
+		std::getline(std::cin, nm.email_from_password);
+	}
 	if(!reciever_sp){
 		std::cout << "enter recievers" << std::endl;
 		std::string rec_tmp = "";
