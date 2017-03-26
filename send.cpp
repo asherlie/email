@@ -5,7 +5,6 @@
 int main(int argc, char* argv[]){
 	notification_message nm;
 	bool atch_sp = false, reciever_sp = false, sub_sp = false, msg_sp = false; //sp - specified
-	//std::string u_u = "", u_p = ""; //user username, user password
 	if(argc > 1){
 		std::string flag = "";
 		int rc = 0; int at = 0; bool snd = false; 
@@ -31,10 +30,6 @@ int main(int argc, char* argv[]){
 			if(flag == "-A")auth_filename = argv[i+1];
 			if(flag == "-S")snd = true; //mail should be sent immediately with no further input
 			if(flag == "-u")nm.email_from_username = argv[i+1];
-			/*
-			 *if(flag == "-u")u_u = argv[i+1];
-			 *if(flag == "-p")u_p = argv[i+1];
-			 */
 			if(flag == "-p")nm.email_from_password = argv[i+1];
 			if(flag == "-h"){
 				std::cout << 
@@ -49,8 +44,7 @@ int main(int argc, char* argv[]){
 			flag = "";
 		}
 		if(snd){
-			//int ret = notify(nm, (u_u == "" && u_p == "")); //second param is criteria for using auth file
-			int ret = notify(nm, (nm.email_from_username == "" && nm.email_from_password == ""));
+			int ret = notify(nm, (nm.email_from_username == "" || nm.email_from_password == ""));
 			if(ret == 67){
 				std::cout << "authentication failure" << std::endl;
 			}
@@ -101,8 +95,7 @@ int main(int argc, char* argv[]){
 	}
 	std::cout << "press enter to send message" << std::endl;
 	while(std::getchar() != '\n');
-	//int ret = notify(nm, (u_u == "" && u_p == ""));
-	int ret = notify(nm, (nm.email_from_username == "" && nm.email_from_password == ""));
+	int ret = notify(nm, (nm.email_from_username == "" || nm.email_from_password == ""));
 	if(ret == 67){
 		std::cout << "authentication failure" << std::endl;
 	}
