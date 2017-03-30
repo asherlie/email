@@ -3,6 +3,7 @@
 #include <curl/curl.h>
 #include <fstream>
 #include <string>
+#include <iostream>
 
 #define MAX_RECVRS 20
 #define MAX_ATTACHMENT_SIZE 25
@@ -40,12 +41,14 @@ std::string* get_auth_info(){
 	return ret;
 }
 
-std::ifstream::pos_type filesize(std::string fn){ //returns filesize
+//std::ifstream::pos_type filesize(std::string fn){ //returns filesize
+int filesize(std::string fn){ //returns filesize -- why use ifs::pos_type
 	std::ifstream inf(fn.c_str(), std::ifstream::ate | std::ifstream::binary);
 	return inf.tellg()/1000000;
 }
 
 std::string build_MIME(std::string subject, std::string message, std::string attachments[]){
+	//std::cout << sizeof(attachments) << std::endl;
 	std::string contents = "Content-Type: multipart/mixed; boundary=adkkibiowiejdkjbazZDJKOIe\n"; //adkkibiowiejdkjbazZDJKOIe is an arbitrary boundary -
 	contents += "Subject: " + subject + "\n";									    // - something that won't come up in a message or subject
 	contents += "--adkkibiowiejdkjbazZDJKOIe\nContent-Type: multipart/alternative; boundary=adkkibiowiejdkjbazZDJKOIe1\n";
@@ -55,7 +58,8 @@ std::string build_MIME(std::string subject, std::string message, std::string att
 	std::string b64_file;
 	//adding attachments encoded in base64 to MIME format
 	for(int i = 0; i < MAX_ATTACHMENT_NUM; ++i){ 
-		if(attachments[i] == "")break;
+		if(attachments[i] == "")break; //TODO find a better place to brk
+		//if(attachments[i] == "" || i >= sizeof(attachments)/sizeof(std::string))break; //TODO find a better place to brk
 		contents += "\n--adkkibiowiejdkjbazZDJKOIe\n";
 		contents += "Content-Type: application/octet-stream; name=\"" + attachments[i] + "\"\nContent-Transfer-Encoding: Base64\nContent-Disposition: attachment; filename=\"" + attachments[i] +"\"\n";
 		cmd = "cat " + attachments[i] + "| base64 | cat > .tmp_b64_file_attachment";
@@ -72,13 +76,7 @@ std::string build_MIME(std::string subject, std::string message, std::string att
 	return contents;
 }
 
-int notify(notification_message& nm, bool use_auth_file){
-	if(file_exists(auth_filename) && use_auth_file){
-		std::string* auth_i = get_auth_info();
-		nm.email_from_username = auth_i[0];
-		nm.email_from_password = auth_i[1];
-		delete[] auth_i;
-	}
+int notify(notification_message& nm){
 	std::string good_attachments[MAX_ATTACHMENT_NUM]; int c = 0; int size_so_far = 0; int tmp_size = 0;
 	for(int i = 0; i < MAX_ATTACHMENT_NUM; ++i){
 		if(nm.attachments[i] == "")break;

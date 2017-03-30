@@ -44,10 +44,16 @@ int main(int argc, char* argv[]){
 			flag = "";
 		}
 		if(snd){
-			int ret = notify(nm, (nm.email_from_username == "" || nm.email_from_password == ""));
-			if(ret == 67){
-				std::cout << "authentication failure" << std::endl;
+			bool use_auth_file = (nm.email_from_username == "" || nm.email_from_password == "");
+			if(file_exists(auth_filename) && use_auth_file){
+				std::string* auth_info = get_auth_info();
+				nm.email_from_username = auth_info[0];
+				nm.email_from_password = auth_info[1];
+				delete[] auth_info;
 			}
+			int ret = notify(nm);
+			if(ret == 67)std::cout << "authentication failure" << std::endl;
+			if(ret == 6)std::cout << "could not connect to the internet" << std::endl;
 			if(ret == 0)std::cout << "email sent succesfully" << std::endl;
 			return ret;
 		}
@@ -66,8 +72,7 @@ int main(int argc, char* argv[]){
 			std::getline(std::cin, rec_tmp);
 			if(rec_tmp == "")break;
 			nm.recievers[i] = rec_tmp;
-		}
-	}
+		} }
 
 	if(!sub_sp){
 		std::cout << "enter email subject" << std::endl;
@@ -80,6 +85,8 @@ int main(int argc, char* argv[]){
 	}
 		
 	if(!atch_sp){
+	//TODO: 
+	//count size. if size >= no more attachments can be attached
 		std::cout << "enter attachments to send" << std::endl;
 		std::string atch = "";
 		for(int i = 0; i < MAX_ATTACHMENT_NUM; ++i){
@@ -102,12 +109,17 @@ int main(int argc, char* argv[]){
 	}
 	std::cout << "press enter to send message" << std::endl;
 	while(std::getchar() != '\n');
-	int ret = notify(nm, (nm.email_from_username == "" || nm.email_from_password == ""));
-	if(ret == 67){
-		std::cout << "authentication failure" << std::endl;
+	bool use_auth_file = (nm.email_from_username == "" || nm.email_from_password == "");
+	if(file_exists(auth_filename) && use_auth_file){
+		std::string* auth_info = get_auth_info();
+		nm.email_from_username = auth_info[0];
+		nm.email_from_password = auth_info[1];
+		delete[] auth_info;
 	}
+	int ret = notify(nm);
+	if(ret == 67)std::cout << "authentication failure" << std::endl;
+	if(ret == 6)std::cout << "could not connect to the internet" << std::endl;
 	if(ret == 0)std::cout << "email sent succesfully" << std::endl;
 	return ret;
 	
 }
-
