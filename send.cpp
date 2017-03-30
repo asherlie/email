@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h> //for getpass()
 #include "email_notifier.cpp"
 
 
@@ -63,7 +64,7 @@ int main(int argc, char* argv[]){
 		std::getline(std::cin, nm.email_from_username);
 
 		std::cout << "\nenter password" << std::endl;
-		std::getline(std::cin, nm.email_from_password);
+		nm.email_from_password = getpass("");
 	}
 	if(!reciever_sp){
 		std::cout << "enter recievers" << std::endl;
