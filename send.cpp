@@ -53,6 +53,7 @@ int main(int argc, char* argv[]){
 				delete[] auth_info;
 			}
 			int ret = notify(nm);
+			if(ret == -2)std::cout << "not even bothering to send this" << std::endl;
 			if(ret == 67)std::cout << "authentication failure" << std::endl;
 			if(ret == 6)std::cout << "could not connect to the internet" << std::endl;
 			if(ret == 0)std::cout << "email sent succesfully" << std::endl;
@@ -118,6 +119,7 @@ int main(int argc, char* argv[]){
 		delete[] auth_info;
 	}
 	int ret = notify(nm);
+	if(ret == -2)std::cout << "login information and recipient(s) must be specified" << std::endl;
 	if(ret == 67)std::cout << "authentication failure" << std::endl;
 	if(ret == 6)std::cout << "could not connect to the internet" << std::endl;
 	if(ret == 0)std::cout << "email sent succesfully" << std::endl;

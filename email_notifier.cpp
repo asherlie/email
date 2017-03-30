@@ -3,7 +3,6 @@
 #include <curl/curl.h>
 #include <fstream>
 #include <string>
-#include <iostream>
 
 #define MAX_RECVRS 20
 #define MAX_ATTACHMENT_SIZE 25
@@ -15,7 +14,6 @@
  */
 
 std::string auth_filename = "auth.txt";
-//bool use_auth_file = true;
 struct notification_message{
 	notification_message() : subject(""), message(""){} 
 	std::string email_from_username;
@@ -33,6 +31,10 @@ bool file_exists(std::string& fname){
 	return ifs.good();
 }
 
+bool is_viable_nm(notification_message& nm){
+	return !(nm.email_from_username == "" || nm.email_from_password == "" || nm.recievers[0] == "");
+}
+
 std::string* get_auth_info(){
 	std::string* ret = new std::string[2];
 	std::ifstream ifs(auth_filename);	
@@ -48,7 +50,6 @@ int filesize(std::string fn){ //returns filesize -- why use ifs::pos_type
 }
 
 std::string build_MIME(std::string subject, std::string message, std::string attachments[]){
-	//std::cout << sizeof(attachments) << std::endl;
 	std::string contents = "Content-Type: multipart/mixed; boundary=adkkibiowiejdkjbazZDJKOIe\n"; //adkkibiowiejdkjbazZDJKOIe is an arbitrary boundary -
 	contents += "Subject: " + subject + "\n";									    // - something that won't come up in a message or subject
 	contents += "--adkkibiowiejdkjbazZDJKOIe\nContent-Type: multipart/alternative; boundary=adkkibiowiejdkjbazZDJKOIe1\n";
@@ -131,6 +132,7 @@ int notify(notification_message& nm){
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 		//curl_easy_perform(curl); //the actual email sending is done here
+		if(!is_viable_nm(nm))return -2;
 		res = curl_easy_perform(curl);
 		//curl_easy_cleanup(curl);
 		remove(tmp_file.c_str());
