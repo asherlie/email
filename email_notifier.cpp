@@ -63,7 +63,7 @@ std::string build_MIME(std::string subject, std::string message, std::string att
 		//if(attachments[i] == "" || i >= sizeof(attachments)/sizeof(std::string))break; //TODO find a better place to brk
 		contents += "\n--adkkibiowiejdkjbazZDJKOIe\n";
 		contents += "Content-Type: application/octet-stream; name=\"" + attachments[i] + "\"\nContent-Transfer-Encoding: Base64\nContent-Disposition: attachment; filename=\"" + attachments[i] +"\"\n";
-		cmd = "cat " + attachments[i] + "| base64 | cat > .tmp_b64_file_attachment";
+		cmd = "cat \"" + attachments[i] + "\"| base64 | cat > .tmp_b64_file_attachment";
 		system(cmd.c_str());
 		cmd = "";
 		std::ifstream in_s(".tmp_b64_file_attachment");

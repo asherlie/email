@@ -1,6 +1,22 @@
 #include <iostream>
 #include <unistd.h> //for getpass()
+#include <dirent.h> //for files in directory
+#include <vector>
 #include "email_notifier.cpp"
+
+//std::string* files_in_dir(std::string directory){
+std::vector<std::string> files_in_dir(std::string directory){
+	//std::string* dir_files = new std::string[MAX_ATTACHMENT_NUM];
+	std::vector<std::string> dir_files;
+	DIR* dir = opendir(directory.c_str());
+	dirent* pdir;
+	int c = 0; 	
+	while((pdir = readdir(dir))){ //in paren to silence warning
+		if(strncmp(pdir->d_name, ".", 2) != 0 && strncmp(pdir->d_name, "..", 2) != 0)dir_files.push_back(pdir->d_name);
+		//dir_files[c++] = pdir->d_name;
+	}
+	return dir_files;
+}
 
 
 int main(int argc, char* argv[]){
@@ -32,10 +48,18 @@ int main(int argc, char* argv[]){
 			if(flag == "-S")snd = true; //mail should be sent immediately with no further input
 			if(flag == "-u")nm.email_from_username = argv[i+1];
 			if(flag == "-p")nm.email_from_password = argv[i+1];
+			if(flag == "-R"){
+				std::vector<std::string> dir = files_in_dir(argv[i+1]);
+				for(int j=0; j <dir.size(); ++j){
+					std::string fname(argv[i+1]);// uses both dir and filenames
+					fname += ("/" + dir[j]); // to get full directory
+					nm.attachments[at++] = fname;
+				}
+			}
 			if(flag == "-h"){
 				std::cout << 
 				"usage:\n-s subject\n-m message\n-r reciever\n-a attachment\n-A auth_filename (if none specified, auth.txt will be used)"
-				"\n-S send with no further input\n-u username\n-p password\n-h help" 
+				"\n-S send with no further input\n-u username\n-p password\n-R recursively attach directory\n-h display this help" 
 				<< std::endl;
 				std::cout << "\n1-" << MAX_RECVRS << " recievers can be specified" << std::endl;
 				std::cout << "1-" << MAX_ATTACHMENT_NUM << " attachments can be specified" << std::endl;
@@ -53,7 +77,7 @@ int main(int argc, char* argv[]){
 				delete[] auth_info;
 			}
 			int ret = notify(nm);
-			if(ret == -2)std::cout << "not even bothering to send this" << std::endl;
+			if(ret == -2)std::cout << "login information and recipient(s) must be specified" << std::endl;
 			if(ret == 67)std::cout << "authentication failure" << std::endl;
 			if(ret == 6)std::cout << "could not connect to the internet" << std::endl;
 			if(ret == 0)std::cout << "email sent succesfully" << std::endl;
@@ -74,7 +98,8 @@ int main(int argc, char* argv[]){
 			std::getline(std::cin, rec_tmp);
 			if(rec_tmp == "")break;
 			nm.recievers[i] = rec_tmp;
-		} }
+		}
+	}
 
 	if(!sub_sp){
 		std::cout << "enter email subject" << std::endl;
@@ -96,7 +121,7 @@ int main(int argc, char* argv[]){
 			if(atch == "")break;
 
 			if(file_exists(atch)){
-				nm.attachments[i] = atch;
+				nm.attachments[i] = atch; //consider switching to global var at, so that these do not overwrite previously declared attachments from flags
 				std::cout << "File will be added to upload list" << std::endl;
 				std::cout << "\ncurrent upload list is: " << std::endl;
 				for(int j = 0; j <= i; ++j){
