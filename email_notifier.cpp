@@ -3,6 +3,9 @@
 #include <curl/curl.h>
 #include <fstream>
 #include <string>
+#include <sstream>
+
+#include "base64.h"
 
 #define MAX_RECVRS 20
 #define MAX_ATTACHMENT_SIZE 25
@@ -57,21 +60,34 @@ std::string build_MIME(std::string subject, std::string message, std::string att
 
 	std::string cmd;
 	std::string b64_file;
+
+      std::string p_text_file;
+      std::string tmp;
 	//adding attachments encoded in base64 to MIME format
 	for(int i = 0; i < MAX_ATTACHMENT_NUM; ++i){ 
 		if(attachments[i] == "")break; //TODO find a better place to brk
 		//if(attachments[i] == "" || i >= sizeof(attachments)/sizeof(std::string))break; //TODO find a better place to brk
 		contents += "\n--adkkibiowiejdkjbazZDJKOIe\n";
 		contents += "Content-Type: application/octet-stream; name=\"" + attachments[i] + "\"\nContent-Transfer-Encoding: Base64\nContent-Disposition: attachment; filename=\"" + attachments[i] +"\"\n";
-		cmd = "cat \"" + attachments[i] + "\"| base64 | cat > .tmp_b64_file_attachment";
-		system(cmd.c_str());
-		cmd = "";
-		std::ifstream in_s(".tmp_b64_file_attachment");
-		while(getline(in_s, b64_file)){
-			contents += b64_file;
-		}
-		b64_file = "";
-		system("rm .tmp_b64_file_attachment");
+            /*
+		 *cmd = "cat \"" + attachments[i] + "\"| base64 | cat > .tmp_b64_file_attachment";
+		 *system(cmd.c_str());
+		 *cmd = "";
+		 *std::ifstream in_s(".tmp_b64_file_attachment");
+		 *while(getline(in_s, b64_file)){
+		 *      contents += b64_file;
+		 *}
+		 *b64_file = "";
+		 *system("rm .tmp_b64_file_attachment");
+             */
+            std::ifstream ifs(attachments[i]);
+            std::stringstream ss;
+            ss << ifs.rdbuf();
+            p_text_file = ss.str();
+
+            Base64::Encode(p_text_file, &b64_file);
+            contents += b64_file;
+            p_text_file = ""; b64_file = "";
 	}
 	contents += "\n--adkkibiowiejdkjbazZDJKOIe--\n";
 	return contents;
