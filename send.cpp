@@ -5,6 +5,15 @@
 #include <vector>
 #include "email_notifier.cpp"
 
+
+void p_err(int ret){
+	if(ret == -2)std::cout << "login information and recipient(s) must be specified" << std::endl;
+	if(ret == 67)std::cout << "authentication failure" << std::endl;
+	if(ret == 6)std::cout << "could not connect to the internet" << std::endl;
+      if(ret == 1)std::cout << "unsupported protocol" << std::endl;
+	if(ret == 0)std::cout << "email sent succesfully" << std::endl;
+}
+
 //std::string* files_in_dir(std::string directory){
 std::vector<std::string> files_in_dir(std::string directory){
 	//std::string* dir_files = new std::string[MAX_ATTACHMENT_NUM];
@@ -78,11 +87,7 @@ int main(int argc, char* argv[]){
 				delete[] auth_info;
 			}
 			int ret = notify(nm);
-			if(ret == -2)std::cout << "login information and recipient(s) must be specified" << std::endl;
-			if(ret == 67)std::cout << "authentication failure" << std::endl;
-			if(ret == 6)std::cout << "could not connect to the internet" << std::endl;
-                  if(ret == 1):std::cout << "unsupported protocol" << std::endl;
-			if(ret == 0)std::cout << "email sent succesfully" << std::endl;
+                  p_err(ret);
 			return ret;
 		}
 	}
@@ -146,10 +151,7 @@ int main(int argc, char* argv[]){
 		delete[] auth_info;
 	}
 	int ret = notify(nm);
-	if(ret == -2)std::cout << "login information and recipient(s) must be specified" << std::endl;
-	if(ret == 67)std::cout << "authentication failure" << std::endl;
-	if(ret == 6)std::cout << "could not connect to the internet" << std::endl;
-	if(ret == 0)std::cout << "email sent succesfully" << std::endl;
+      p_err(ret);
 	return ret;
 	
 }
