@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string.h>
 #include <unistd.h> //for getpass()
 #include <dirent.h> //for files in directory
 #include <vector>
@@ -80,6 +81,7 @@ int main(int argc, char* argv[]){
 			if(ret == -2)std::cout << "login information and recipient(s) must be specified" << std::endl;
 			if(ret == 67)std::cout << "authentication failure" << std::endl;
 			if(ret == 6)std::cout << "could not connect to the internet" << std::endl;
+                  if(ret == 1):std::cout << "unsupported protocol" << std::endl;
 			if(ret == 0)std::cout << "email sent succesfully" << std::endl;
 			return ret;
 		}
