@@ -14,11 +14,6 @@
 #define MAX_ATTACHMENT_SIZE 25
 #define MAX_ATTACHMENT_NUM 50
 
-/*
- * To use a gmail account as a sender, 'less secure apps' must be enabled 
- * This can be done here: https://www.google.com/settings/security/lesssecureapps
- */
-
 std::string auth_filename = "auth.txt";
 struct notification_message{
 	notification_message() : subject(""), message(""){} 
