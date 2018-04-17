@@ -68,7 +68,7 @@ int filesize(char* fn){
 char* build_MIME(char* subject, char* message, char** attachments, int n_attachments){
       char* contents = calloc(sizeof(char), 10000);
 
-      sprintf(contents, "Content-Type: multipart/mixed; boundary=adkkibiowiejdkjbazZDJKOIe\nSubject: %s\n --adkkibiowiejdkjbazZDJKOIe\nContent-Type: multipart/alternative; boundary=adkkibiowiejdkjbazZDJKOIe1\n--adkkibiowiejdkjbazZDJKOIe1\n Content-Type: text/plain; charset=UTF-8\n\n%s\n--adkkibiowiejdkjbazZDJKOIe1--\n" , subject, message);
+      sprintf(contents, "Content-Type: multipart/mixed; boundary=adkkibiowiejdkjbazZDJKOIe\nSubject: %s\n--adkkibiowiejdkjbazZDJKOIe\nContent-Type: multipart/alternative; boundary=adkkibiowiejdkjbazZDJKOIe1\n--adkkibiowiejdkjbazZDJKOIe1\n Content-Type: text/plain; charset=UTF-8\n\n%s\n--adkkibiowiejdkjbazZDJKOIe1--\n" , subject, message);
 /*
  *      strcat(contents, "Content-Type: multipart/mixed; boundary=adkkibiowiejdkjbazZDJKOIe\n"); //adkkibiowiejdkjbazZDJKOIe is an arbitrary boundary -
  *      contents += "Subject: " + subject + "\n";									    // - something that won't come up in a message or subject
