@@ -6,15 +6,10 @@
 #define MAX_ATTACHMENT_NUM 50
 
 struct notification_message{
-	/*notification_message() : subject(""), message(""){} */
 	char* email_from_username;
 	char* email_from_password;
-
-	/*char* attachments[MAX_ATTACHMENT_NUM];*/
 	char** attachments;
-	/*char* recievers[MAX_RECVRS];*/
 	char** recievers;
-
 	char* subject;
 	char* message;
 };

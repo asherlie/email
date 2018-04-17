@@ -21,7 +21,6 @@ struct notification_message* init_nm(){
 	nm->message = calloc(sizeof(char), 10000);
 }
 
-
 bool file_exists(char* fname){
       FILE* fp = fopen(fname, "r");
       bool ret = fp != NULL;
@@ -30,7 +29,9 @@ bool file_exists(char* fname){
 }
 
 bool is_viable_nm(struct notification_message* nm){
-	return !(strcmp(nm->email_from_username, "") == 0 || strcmp(nm->email_from_password, "") == 0 || strcmp(nm->recievers[0],  "") == 0);
+	return !(strcmp(nm->email_from_username, "") == 0 || 
+             strcmp(nm->email_from_password, "") == 0 || 
+             strcmp(nm->recievers[0],  "") == 0);
 }
 
 char** get_auth_info(){
