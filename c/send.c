@@ -56,6 +56,7 @@ int main(int argc, char* argv[]){
                         username\n-p password\n-R recursively attach directory\n-h display this help\n\
                         \n1-%i recievers can be specified\n1-%i attachments can be specified",
                         MAX_RECVRS, MAX_ATTACHMENT_NUM);
+                        free_nm(nm);
 				return 0;
 			}
 		}
@@ -69,6 +70,7 @@ int main(int argc, char* argv[]){
 			}
 			int ret = notify(nm);
                   p_err(ret);
+                  free_nm(nm);
 			return ret;
 		}
 	}
@@ -135,6 +137,7 @@ int main(int argc, char* argv[]){
 	}
 	int ret = notify(nm);
       p_err(ret);
+      free_nm(nm);
 	return ret;
 	
 }

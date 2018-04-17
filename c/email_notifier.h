@@ -15,6 +15,7 @@ struct notification_message{
 };
 
 struct notification_message* init_nm();
+void free_nm(struct notification_message* nm);
 bool file_exists(char* fname);
 bool is_viable_nm(struct notification_message* nm);
 char** get_auth_info();

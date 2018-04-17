@@ -16,9 +16,20 @@ struct notification_message* init_nm(){
 	nm->recievers = calloc(sizeof(char*), MAX_RECVRS);
       for(int i = 0; i < MAX_ATTACHMENT_NUM; ++i)nm->attachments[i] = calloc(sizeof(char), 100);
       for(int i = 0; i < MAX_RECVRS; ++i)nm->recievers[i] = calloc(sizeof(char), 100);
-
 	nm->subject = calloc(sizeof(char), 256);
 	nm->message = calloc(sizeof(char), 10000);
+}
+
+void free_nm(struct notification_message* nm){
+      free(nm->email_from_username);
+      free(nm->email_from_password);
+      for(int i = 0; i < MAX_ATTACHMENT_NUM; ++i)free(nm->attachments[i]);
+      free(nm->attachments);
+      for(int i = 0;i < MAX_RECVRS; ++i)free(nm->recievers[i]);
+      free(nm->recievers);
+      free(nm->subject);
+      free(nm->message);
+      free(nm);
 }
 
 bool file_exists(char* fname){
@@ -104,14 +115,15 @@ int notify(struct notification_message* nm){
 	}
       char tmp_file[] = ".tmp_mail_contents";
       FILE* fp = fopen(tmp_file, "w");
-      fputs(build_MIME(nm->subject, nm->message, good_attachments, c), fp);
-
+      char* MIME = build_MIME(nm->subject, nm->message, good_attachments, c);
+      fputs(MIME, fp);
+      free(MIME);
+      free(good_attachments);
       fclose(fp);
 	CURL* curl;
 	FILE* FP;
 	struct curl_slist* recipients = NULL;
 	CURLcode res = CURLE_OK;
-
 	curl = curl_easy_init();
 	if(curl){
 		FP = fopen(tmp_file, "r");
@@ -130,7 +142,9 @@ int notify(struct notification_message* nm){
 		if(!is_viable_nm(nm))return -2;
 		res = curl_easy_perform(curl);
 		remove(tmp_file);
+            curl_easy_cleanup(curl);
 		return (int)res;
 	}
+      curl_easy_cleanup(curl);
 	return -1;
 }
