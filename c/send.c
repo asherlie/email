@@ -49,8 +49,8 @@ int main(int argc, char* argv[]){
                   }
 		}
 		if(snd){
-			bool use_auth_file = (strcmp(nm->email_from_username, "") == 0 || strcmp(nm->email_from_password, "") == 0);
-			if(file_exists(auth_filename) && use_auth_file){
+			bool use_auth_file = (!*nm->email_from_username || !*nm->email_from_password);
+			if(use_auth_file && file_exists(auth_filename)){
 				char** auth_info = get_auth_info();
                         strcpy(nm->email_from_username, auth_info[0]);
                         strcpy(nm->email_from_password, auth_info[1]);
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]){
 			return ret;
 		}
 	}
-	if((strcmp(auth_filename, "") == 0 || !file_exists(auth_filename)) && (strcmp(nm->email_from_username, "") == 0 || strcmp(nm->email_from_password, "") == 0)){ // auth filename will never be "", initialized to auth.txt
+	if((strcmp(auth_filename, "") == 0 || !file_exists(auth_filename)) && (!*nm->email_from_username || !*nm->email_from_password)){
 		printf("enter username\n");
             size_t sz = 0;
             getline(&nm->email_from_username, &sz, stdin);
@@ -94,7 +94,7 @@ int main(int argc, char* argv[]){
 		
 	if(!atch_sp){
 		printf("enter attachments to send\n");
-            char* atch;
+            char* atch = NULL;
             size_t sz = 0;
             ssize_t read = 0;
 		for(int i = 0; i < MAX_ATTACHMENT_NUM; ++i){
@@ -117,7 +117,7 @@ int main(int argc, char* argv[]){
 	}
 	printf("press enter to send message\n");
 	while(getchar() != '\n');
-	bool use_auth_file = (strcmp(nm->email_from_username, "") == 0 || strcmp(nm->email_from_password, "") == 0);
+      bool use_auth_file = (!*nm->email_from_username || !*nm->email_from_password);
 	if(file_exists(auth_filename) && use_auth_file){
             char** auth_info = get_auth_info();
 		nm->email_from_username = auth_info[0];
