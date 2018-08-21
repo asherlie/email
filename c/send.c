@@ -16,26 +16,21 @@ void p_err(int ret){
             case 0:  printf("email sent succesfully\n"); break;
             default: printf("unknown error: %i occured\n", ret);
       }
-      
 }
 
 // TODO: fix ridiculous memory leaks
 int main(int argc, char* argv[]){
-	struct notification_message* nm = init_nm();
-	bool atch_sp = false, sub_sp = false, msg_sp = false; //sp - specified
-      int rc = 0;
+	struct notification_message* nm = init_nm(NULL);
+	bool sub_sp = false, msg_sp = false; //sp - specified
 	if(argc > 1){
-            char flag[3];
-		int at = 0; bool snd = false; 
+		bool snd = false; 
 		for(int i = 1; i < argc; ++i){
-			flag[0] = argv[i][0];
-			flag[1] = argv[i][1];
                   if(*argv[i] == '-'){
                         switch(argv[i][1]){
                               case 's': nm->subject = argv[i+1]; sub_sp = true; break;
                               case 'm': nm->message = argv[i+1]; msg_sp = true; break;
-                              case 'r': nm->recievers[rc++] = argv[i+1]; break;
-                              case 'a': nm->attachments[at++] = argv[i+1]; atch_sp = true; break;
+                              case 'r': add_reciever(nm, argv[i+1]); break;
+                              case 'a': add_attachment(nm, argv[i+1]); break;
                               case 'A': memset(auth_filename, '\0', strlen(auth_filename)); strcpy(auth_filename, argv[i+1]); break;
                               case 'S': snd = true; break;
                               case 'u': nm->email_from_username = argv[i+1]; break;
@@ -59,7 +54,7 @@ int main(int argc, char* argv[]){
                         strcpy(nm->email_from_password, auth_info[1]);
                         free(auth_info); // lol
 			}
-			int ret = notify(nm);
+                  int ret = notify(nm);
                   p_err(ret);
                   free_nm(nm);
 			return ret;
@@ -72,7 +67,7 @@ int main(int argc, char* argv[]){
 		printf("\nenter password\n");
 		nm->email_from_password = getpass("");
 	}
-	if(!rc){
+	if(!nm->n_recievers){
 		printf("enter recievers\n");
 		char* rec_tmp;
             size_t sz = 0;
@@ -95,7 +90,7 @@ int main(int argc, char* argv[]){
             getline(&nm->message, &sz, stdin);
 	}
 		
-	if(!atch_sp){
+	if(!nm->n_attachments){
 		printf("enter attachments to send\n");
             char* atch = NULL;
             size_t sz = 0;

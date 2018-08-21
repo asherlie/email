@@ -7,17 +7,38 @@
 
 char auth_filename[] = "auth.txt";
 
-struct notification_message* init_nm(){
-      struct notification_message* nm = malloc(sizeof(struct notification_message));
+struct notification_message* init_nm(struct notification_message* nm){
+      if(!nm)nm = malloc(sizeof(struct notification_message));
+      nm->atch_cap = nm->recv_cap = 5; 
+      nm->n_attachments = nm->n_recievers = 0;
       nm->email_from_username = calloc(sizeof(char), 100);
       nm->email_from_password = calloc(sizeof(char), 100);
 
 	nm->attachments = calloc(sizeof(char*), MAX_ATTACHMENT_NUM);
 	nm->recievers = calloc(sizeof(char*), MAX_RECVRS);
-      for(int i = 0; i < MAX_ATTACHMENT_NUM; ++i)nm->attachments[i] = calloc(sizeof(char), 100);
-      for(int i = 0; i < MAX_RECVRS; ++i)nm->recievers[i] = calloc(sizeof(char), 100);
 	nm->subject = calloc(sizeof(char), 256);
 	nm->message = calloc(sizeof(char), 10000);
+      return nm;
+}
+
+int add_el_to_cpp(char** cpp, char* el, int* cap, int* sz){
+      if(*sz == *cap){
+            *cap *= 2;
+            char** tmp = calloc(sizeof(char*), *cap);
+            for(int i = 0; i < *sz; ++i)tmp[i] = cpp[i];
+            free(cpp);
+            cpp = tmp;
+      }
+      cpp[(*sz)++] = el;
+      return *sz;
+}
+
+int add_attachment(struct notification_message* nm, char* atch_str){
+      return add_el_to_cpp(nm->attachments, atch_str, &nm->atch_cap, &nm->n_attachments);
+}
+
+int add_reciever(struct notification_message* nm, char* recv_str){
+      return add_el_to_cpp(nm->recievers, recv_str, &nm->recv_cap, &nm->n_recievers);
 }
 
 void free_nm(struct notification_message* nm){
@@ -29,7 +50,6 @@ void free_nm(struct notification_message* nm){
       free(nm->recievers);
       free(nm->subject);
       free(nm->message);
-      free(nm);
 }
 
 bool file_exists(char* fname){
@@ -68,8 +88,6 @@ char* build_MIME(char* subject, char* message, char** attachments, int n_attachm
       char* contents = calloc(sizeof(char), 10000);
       sprintf(contents, "Content-Type: multipart/mixed; boundary=adkkibiowiejdkjbazZDJKOIe\nSubject: %s\n--adkkibiowiejdkjbazZDJKOIe\nContent-Type: multipart/alternative; boundary=adkkibiowiejdkjbazZDJKOIe1\n--adkkibiowiejdkjbazZDJKOIe1\n Content-Type: text/plain; charset=UTF-8\n\n%s\n--adkkibiowiejdkjbazZDJKOIe1--\n" , subject, message);
 	char* b64_file;
-      char* p_text_file;
-      char* tmp;
 	//adding attachments encoded in base64 to MIME format
 	for(int i = 0; i < n_attachments; ++i){ 
             // TODO: implement base64 library method of MIME encoding
@@ -94,25 +112,20 @@ char* build_MIME(char* subject, char* message, char** attachments, int n_attachm
 int notify(struct notification_message* nm){
 	char** good_attachments = calloc(sizeof(char*), MAX_ATTACHMENT_NUM+1);
       int c = 0; int size_so_far = 0; int tmp_size = 0;
-	for(int i = 0; i < MAX_ATTACHMENT_NUM; ++i){
-		if(strcmp(nm->attachments[i], "") == 0)break;
-		if(file_exists(nm->attachments[i])){
-			tmp_size = filesize(nm->attachments[i]);
+      for(int i = 0; i < nm->n_attachments; ++i){
+            if(file_exists(nm->attachments[i])){
+                  tmp_size = filesize(nm->attachments[i]);
 			if(tmp_size + size_so_far <= MAX_ATTACHMENT_SIZE){ //if i can spare some MB's 
 				size_so_far += tmp_size; 
                         good_attachments[c++] = nm->attachments[i];
 			}
-			else {
+			else
                         // TODO: add more meaningful output, print max size and size of file for example
                         strcat(nm->message, "FILE TOO LARGE\n");
-			}
-		}
-		else {
-                  // TODO: add more meaningful output
-                  strcat(nm->message, "FILE DOES NOT EXIST\n");
-		}
+            }
+		else strcat(nm->message, "FILE DOES NOT EXIST\n");
 		tmp_size = 0;
-	}
+      }
       char tmp_file[] = ".tmp_mail_contents";
       FILE* fp = fopen(tmp_file, "w");
       char* MIME = build_MIME(nm->subject, nm->message, good_attachments, c);
@@ -132,10 +145,7 @@ int notify(struct notification_message* nm){
 		curl_easy_setopt(curl, CURLOPT_URL, "smtp://smtp.gmail.com:587");
 		curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
 		curl_easy_setopt(curl, CURLOPT_MAIL_FROM, nm->email_from_username);
-		for(int i = 0; i< MAX_RECVRS; ++i){ //adds all recipients from std::string recievers[]
-			if(strcmp(nm->recievers[i], "") == 0)break;
-			recipients = curl_slist_append(recipients, nm->recievers[i]);
-		}
+            for(int i = 0; i < nm->n_recievers; ++i)recipients = curl_slist_append(recipients, nm->recievers[i]);
 		curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 		curl_easy_setopt(curl, CURLOPT_READDATA, FP);
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
