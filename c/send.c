@@ -19,10 +19,11 @@ void p_err(int ret){
 // TODO: fix ridiculous memory leaks
 int main(int argc, char* argv[]){
 	struct notification_message* nm = init_nm();
-	bool atch_sp = false, reciever_sp = false, sub_sp = false, msg_sp = false; //sp - specified
+	bool atch_sp = false, sub_sp = false, msg_sp = false; //sp - specified
+      int rc = 0;
 	if(argc > 1){
             char flag[3];
-		int rc = 0; int at = 0; bool snd = false; 
+		int at = 0; bool snd = false; 
 		for(int i = 1; i < argc; ++i){
 			flag[0] = argv[i][0];
 			flag[1] = argv[i][1];
@@ -30,8 +31,7 @@ int main(int argc, char* argv[]){
                         switch(argv[i][1]){
                               case 's': nm->subject = argv[i+1]; sub_sp = true; break;
                               case 'm': nm->message = argv[i+1]; msg_sp = true; break;
-                              // TODO: get rid of reciever_sp in favor of just using rc
-                              case 'r': nm->recievers[rc++] = argv[i+1]; reciever_sp = true; break;
+                              case 'r': nm->recievers[rc++] = argv[i+1]; break;
                               case 'a': nm->attachments[at++] = argv[i+1]; atch_sp = true; break;
                               case 'A': memset(auth_filename, '\0', strlen(auth_filename)); strcpy(auth_filename, argv[i+1]); break;
                               case 'S': snd = true; break;
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]){
 		printf("\nenter password\n");
 		nm->email_from_password = getpass("");
 	}
-	if(!reciever_sp){
+	if(!rc){
 		printf("enter recievers\n");
 		char* rec_tmp;
             size_t sz = 0;
