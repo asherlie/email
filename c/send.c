@@ -36,10 +36,10 @@ int main(int argc, char* argv[]){
                               case 'u': nm->email_from_username = strdup(argv[i+1]); break;
                               case 'p': nm->email_from_password = strdup(argv[i+1]); break;
                               case 'h': printf(
-                                        "usage:\n-s subject\n-m message\n-r reciever\n-a attachment\n-A auth_filename \
-                                        (if none specified, auth.txt will be used)\n-S send with no further input\n-u \
-                                        username\n-p password\n-R recursively attach directory\n-h display this help\n\
-                                        \n1-%i recievers can be specified\n1-%i attachments can be specified",
+                                        "usage:\n    -s subject\n    -m message\n    -r reciever\n    -a attachment\n    -A auth_filename"
+                                        "(if none specified, auth.txt will be used)\n    -S send with no further input\n    -u "
+                                        "username\n    -p password\n    -R recursively attach directory\n    -h display this help\n"
+                                        "\n1-%i recievers can be specified\n1-%i attachments can be specified\n",
                                         MAX_RECVRS, MAX_ATTACHMENT_NUM);
                                         free_nm(nm);
                                         return 0;
