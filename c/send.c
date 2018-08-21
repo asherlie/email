@@ -21,44 +21,32 @@ int main(int argc, char* argv[]){
 	struct notification_message* nm = init_nm();
 	bool atch_sp = false, reciever_sp = false, sub_sp = false, msg_sp = false; //sp - specified
 	if(argc > 1){
-            char flag[2];
+            char flag[3];
 		int rc = 0; int at = 0; bool snd = false; 
-		for(int i = 0; i < argc; ++i){
+		for(int i = 1; i < argc; ++i){
 			flag[0] = argv[i][0];
 			flag[1] = argv[i][1];
-			if(strcmp(flag, "-s") == 0){
-				nm->subject = argv[i+1];
-				sub_sp = true;
-			}
-			if(strcmp(flag, "-m") == 0){
-				nm->message = argv[i+1];
-				msg_sp = true;
-			}
-			if(strcmp(flag, "-r") == 0){
-				nm->recievers[rc++] = argv[i+1];
-				reciever_sp = true;
-			}
-			if(strcmp(flag, "-a") == 0){
-				nm->attachments[at++] = argv[i+1];
-				atch_sp = true;
-			}
-			if(strcmp(flag, "-A") == 0){
-                        memset(auth_filename, '\0', strlen(auth_filename));
-                        strcpy(auth_filename, argv[i+1]);
+                  if(*argv[i] == '-'){
+                        switch(argv[i][1]){
+                              case 's': nm->subject = argv[i+1]; sub_sp = true; break;
+                              case 'm': nm->message = argv[i+1]; msg_sp = true; break;
+                              // TODO: get rid of reciever_sp in favor of just using rc
+                              case 'r': nm->recievers[rc++] = argv[i+1]; reciever_sp = true; break;
+                              case 'a': nm->attachments[at++] = argv[i+1]; atch_sp = true; break;
+                              case 'A': memset(auth_filename, '\0', strlen(auth_filename)); strcpy(auth_filename, argv[i+1]); break;
+                              case 'S': snd = true; break;
+                              case 'u': nm->email_from_username = argv[i+1]; break;
+                              case 'p': nm->email_from_password = argv[i+1]; break;
+                              case 'h': printf(
+                                        "usage:\n-s subject\n-m message\n-r reciever\n-a attachment\n-A auth_filename \
+                                        (if none specified, auth.txt will be used)\n-S send with no further input\n-u \
+                                        username\n-p password\n-R recursively attach directory\n-h display this help\n\
+                                        \n1-%i recievers can be specified\n1-%i attachments can be specified",
+                                        MAX_RECVRS, MAX_ATTACHMENT_NUM);
+                                        free_nm(nm);
+                                        return 0;
+                        }
                   }
-			if(strcmp(flag, "-S") == 0)snd = true; // mail should be sent immediately with no further input
-			if(strcmp(flag, "-u") == 0)strcpy(nm->email_from_username, argv[i+1]);
-			if(strcmp(flag, "-p") == 0)strcpy(nm->email_from_password, argv[i+1]);
-			if(strcmp(flag, "-h") == 0){
-                        printf(
-				"usage:\n-s subject\n-m message\n-r reciever\n-a attachment\n-A auth_filename \
-                        (if none specified, auth.txt will be used)\n-S send with no further input\n-u \
-                        username\n-p password\n-R recursively attach directory\n-h display this help\n\
-                        \n1-%i recievers can be specified\n1-%i attachments can be specified",
-                        MAX_RECVRS, MAX_ATTACHMENT_NUM);
-                        free_nm(nm);
-				return 0;
-			}
 		}
 		if(snd){
 			bool use_auth_file = (strcmp(nm->email_from_username, "") == 0 || strcmp(nm->email_from_password, "") == 0);
