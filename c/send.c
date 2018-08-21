@@ -8,12 +8,15 @@
 extern char auth_filename[];
 
 void p_err(int ret){
-	if(ret == -2)printf("login information and recipient(s) must be specified\n");
-	else if(ret == 67)printf("authentication failure\n");
-	else if(ret == 6)printf("could not connect to the internet\n");
-      else if(ret == 1)printf("unsupported protocol\n");
-	else if(ret == 0)printf("email sent succesfully\n");
-      else printf("unknown error: %i occured\n", ret);
+      switch(ret){
+            case -1: printf("login information and recipient(s) must be specified\n"); break;
+            case 67: printf("authentication failure\n"); break;
+            case 6:  printf("could not connect to the internet\n"); break;
+            case 1:  printf("unsupported protocol\n"); break;
+            case 0:  printf("email sent succesfully\n"); break;
+            default: printf("unknown error: %i occured\n", ret);
+      }
+      
 }
 
 // TODO: fix ridiculous memory leaks
