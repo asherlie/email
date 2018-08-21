@@ -27,14 +27,14 @@ int main(int argc, char* argv[]){
 		for(int i = 1; i < argc; ++i){
                   if(*argv[i] == '-'){
                         switch(argv[i][1]){
-                              case 's': nm->subject = argv[i+1]; sub_sp = true; break;
-                              case 'm': nm->message = argv[i+1]; msg_sp = true; break;
-                              case 'r': add_reciever(nm, argv[i+1]); break;
-                              case 'a': add_attachment(nm, argv[i+1]); break;
+                              case 's': nm->subject = strdup(argv[i+1]); sub_sp = true; break;
+                              case 'm': nm->message = strdup(argv[i+1]); msg_sp = true; break;
+                              case 'r': add_reciever(nm, strdup(argv[i+1])); break;
+                              case 'a': add_attachment(nm, strdup(argv[i+1])); break;
                               case 'A': memset(auth_filename, '\0', strlen(auth_filename)); strcpy(auth_filename, argv[i+1]); break;
                               case 'S': snd = true; break;
-                              case 'u': nm->email_from_username = argv[i+1]; break;
-                              case 'p': nm->email_from_password = argv[i+1]; break;
+                              case 'u': nm->email_from_username = strdup(argv[i+1]); break;
+                              case 'p': nm->email_from_password = strdup(argv[i+1]); break;
                               case 'h': printf(
                                         "usage:\n-s subject\n-m message\n-r reciever\n-a attachment\n-A auth_filename \
                                         (if none specified, auth.txt will be used)\n-S send with no further input\n-u \
@@ -47,12 +47,11 @@ int main(int argc, char* argv[]){
                   }
 		}
 		if(snd){
-			bool use_auth_file = (!*nm->email_from_username || !*nm->email_from_password);
+			bool use_auth_file = (!nm->email_from_username || !nm->email_from_password);
 			if(use_auth_file && file_exists(auth_filename)){
 				char** auth_info = get_auth_info();
-                        strcpy(nm->email_from_username, auth_info[0]);
-                        strcpy(nm->email_from_password, auth_info[1]);
-                        free(auth_info); // lol
+                        nm->email_from_username = auth_info[0];
+                        nm->email_from_password = auth_info[1];
 			}
                   int ret = notify(nm);
                   p_err(ret);
@@ -60,7 +59,7 @@ int main(int argc, char* argv[]){
 			return ret;
 		}
 	}
-	if((strcmp(auth_filename, "") == 0 || !file_exists(auth_filename)) && (!*nm->email_from_username || !*nm->email_from_password)){
+	if((strcmp(auth_filename, "") == 0 || !file_exists(auth_filename)) && (!nm->email_from_username || !nm->email_from_password)){
 		printf("enter username\n");
             size_t sz = 0;
             getline(&nm->email_from_username, &sz, stdin);
@@ -115,7 +114,7 @@ int main(int argc, char* argv[]){
 	}
 	printf("press enter to send message\n");
 	while(getchar() != '\n');
-      bool use_auth_file = (!*nm->email_from_username || !*nm->email_from_password);
+      bool use_auth_file = (!nm->email_from_username || !nm->email_from_password);
 	if(file_exists(auth_filename) && use_auth_file){
             char** auth_info = get_auth_info();
 		nm->email_from_username = auth_info[0];

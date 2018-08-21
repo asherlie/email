@@ -9,15 +9,13 @@ char auth_filename[] = "auth.txt";
 
 struct notification_message* init_nm(struct notification_message* nm){
       if(!nm)nm = malloc(sizeof(struct notification_message));
+      nm->email_from_username = nm->email_from_password = NULL;
+      nm->attachments = nm->recievers = NULL;
       nm->atch_cap = nm->recv_cap = 5; 
       nm->n_attachments = nm->n_recievers = 0;
-      nm->email_from_username = calloc(sizeof(char), 100);
-      nm->email_from_password = calloc(sizeof(char), 100);
-
-	nm->attachments = calloc(sizeof(char*), MAX_ATTACHMENT_NUM);
-	nm->recievers = calloc(sizeof(char*), MAX_RECVRS);
-	nm->subject = calloc(sizeof(char), 256);
-	nm->message = calloc(sizeof(char), 10000);
+      nm->attachments = calloc(sizeof(char*), nm->atch_cap);
+      nm->recievers = calloc(sizeof(char*), nm->recv_cap);
+      nm->subject = nm->message = NULL;
       return nm;
 }
 
@@ -42,14 +40,14 @@ int add_reciever(struct notification_message* nm, char* recv_str){
 }
 
 void free_nm(struct notification_message* nm){
-      free(nm->email_from_username);
-      free(nm->email_from_password);
-      for(int i = 0; i < MAX_ATTACHMENT_NUM; ++i)free(nm->attachments[i]);
-      free(nm->attachments);
-      for(int i = 0;i < MAX_RECVRS; ++i)free(nm->recievers[i]);
-      free(nm->recievers);
-      free(nm->subject);
-      free(nm->message);
+      if(nm->email_from_username)free(nm->email_from_username);
+      if(nm->email_from_password)free(nm->email_from_password);
+      for(int i = 0; i < nm->n_attachments; ++i)free(nm->attachments[i]);
+      if(nm->n_attachments)free(nm->attachments);
+      for(int i = 0; i < nm->n_recievers; ++i)free(nm->recievers[i]);
+      if(nm->n_recievers)free(nm->recievers);
+      if(nm->subject)free(nm->subject);
+      if(nm->message)free(nm->message);
 }
 
 bool file_exists(char* fname){
