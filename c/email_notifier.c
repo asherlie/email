@@ -82,8 +82,36 @@ int filesize(char* fn){
       return sz/1000000;
 }
 
+char* f_to_b64(char* file, int* fsz){
+      *fsz = 0;
+      char cmd[100];
+      sprintf(cmd, "cat \"%s\" | base64 | cat > .tmp_b64_file", file);
+      system(cmd);
+      FILE* fp = fopen(".tmp_b64_file", "r");
+      size_t sz = 0;
+      char* b64_file = NULL;
+      ssize_t read;
+      int cap = 1000;
+      char* b64 = calloc(sizeof(char), cap);
+      while((read = getline(&b64_file, &sz, fp)) != EOF){
+            if(*fsz+read >= cap){
+                  cap *= 2;
+                  char* tmp = calloc(sizeof(char), cap);
+                  memcpy(tmp, b64, *fsz);
+                  free(b64);
+                  b64 = tmp;
+            }
+            strcpy(b64+*fsz, b64_file);
+            *fsz += read;
+      }
+      fclose(fp);
+      system("rm .tmp_b64_file");
+      return b64;
+}
+
 char* build_MIME(char* subject, char* message, char** attachments, int n_attachments){
-      char* contents = calloc(sizeof(char), 10000);
+      int cap = 10000;
+      char* contents = calloc(sizeof(char), cap);
       sprintf(contents, "Content-Type: multipart/mixed; boundary=adkkibiowiejdkjbazZDJKOIe\nSubject: %s\n--adkkibiowiejdkjbazZDJKOIe\nContent-Type: multipart/alternative; boundary=adkkibiowiejdkjbazZDJKOIe1\n--adkkibiowiejdkjbazZDJKOIe1\n Content-Type: text/plain; charset=UTF-8\n\n%s\n--adkkibiowiejdkjbazZDJKOIe1--\n" , subject, message);
 	char* b64_file;
 	//adding attachments encoded in base64 to MIME format
@@ -107,6 +135,7 @@ char* build_MIME(char* subject, char* message, char** attachments, int n_attachm
 	return contents;
 }
 
+/*getting a seg fault from here when using sn as an attachment*/
 int notify(struct notification_message* nm){
 	char** good_attachments = calloc(sizeof(char*), MAX_ATTACHMENT_NUM+1);
       int c = 0; int size_so_far = 0; int tmp_size = 0;
