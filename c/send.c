@@ -22,43 +22,42 @@ void p_err(int ret){
 int main(int argc, char* argv[]){
 	struct notification_message* nm = init_nm(NULL);
 	bool sub_sp = false, msg_sp = false; //sp - specified
-	if(argc > 1){
-		bool snd = false; 
-		for(int i = 1; i < argc; ++i){
-                  if(*argv[i] == '-'){
-                        switch(argv[i][1]){
-                              case 's': nm->subject = strdup(argv[i+1]); sub_sp = true; break;
-                              case 'm': nm->message = strdup(argv[i+1]); msg_sp = true; break;
-                              case 'r': add_reciever(nm, strdup(argv[i+1])); break;
-                              case 'a': add_attachment(nm, strdup(argv[i+1])); break;
-                              case 'A': memset(auth_filename, '\0', strlen(auth_filename)); strcpy(auth_filename, argv[i+1]); break;
-                              case 'S': snd = true; break;
-                              case 'u': nm->email_from_username = strdup(argv[i+1]); break;
-                              case 'p': nm->email_from_password = strdup(argv[i+1]); break;
-                              case 'h': printf(
-                                        "usage:\n    -s subject\n    -m message\n    -r reciever\n    -a attachment\n    -A auth_filename"
-                                        "(if none specified, auth.txt will be used)\n    -S send with no further input\n    -u "
-                                        "username\n    -p password\n    -R recursively attach directory\n    -h display this help\n"
-                                        "\n1-%i recievers can be specified\n1-%i attachments can be specified\n",
-                                        MAX_RECVRS, MAX_ATTACHMENT_NUM);
-                                        free_nm(nm);
-                                        return 0;
-                        }
+      bool snd = false; 
+      for(int i = 1; i < argc; ++i){
+            if(*argv[i] == '-'){
+                  switch(argv[i][1]){
+                        case 's': nm->subject = strdup(argv[i+1]); sub_sp = true; break;
+                        case 'm': nm->message = strdup(argv[i+1]); msg_sp = true; break;
+                        case 'r': add_reciever(nm, strdup(argv[i+1])); break;
+                        case 'a': add_attachment(nm, strdup(argv[i+1])); break;
+                        case 'A': memset(auth_filename, '\0', strlen(auth_filename)); strcpy(auth_filename, argv[i+1]); break;
+                        case 'S': snd = true; break;
+                        case 'u': nm->email_from_username = strdup(argv[i+1]); break;
+                        case 'p': nm->email_from_password = strdup(argv[i+1]); break;
+                        case 'h': printf(
+                                  "usage:\n    -s subject\n    -m message\n    -r reciever\n    -a attachment\n    -A auth_filename"
+                                  "(if none specified, auth.txt will be used)\n    -S send with no further input\n    -u "
+                                  "username\n    -p password\n    -R recursively attach directory\n    -h display this help\n"
+                                  "\n1-%i recievers can be specified\n1-%i attachments can be specified\n",
+                                  MAX_RECVRS, MAX_ATTACHMENT_NUM);
+                                  free_nm(nm);
+                                  return 0;
                   }
-		}
-		if(snd){
-			bool use_auth_file = (!nm->email_from_username || !nm->email_from_password);
-			if(use_auth_file && file_exists(auth_filename)){
-				char** auth_info = get_auth_info();
-                        nm->email_from_username = auth_info[0];
-                        nm->email_from_password = auth_info[1];
-			}
-                  int ret = notify(nm);
-                  p_err(ret);
-                  free_nm(nm);
-			return ret;
-		}
-	}
+            }
+      }
+      if(snd){
+            bool use_auth_file = (!nm->email_from_username || !nm->email_from_password);
+            if(use_auth_file && file_exists(auth_filename)){
+                  char** auth_info = get_auth_info();
+                  nm->email_from_username = auth_info[0];
+                  nm->email_from_password = auth_info[1];
+            }
+            if(!nm_warn(nm, true))return 1;
+            int ret = notify(nm);
+            p_err(ret);
+            free_nm(nm);
+            return ret;
+      }
 	if((strcmp(auth_filename, "") == 0 || !file_exists(auth_filename)) && (!nm->email_from_username || !nm->email_from_password)){
 		printf("enter username\n");
             size_t sz = 0;

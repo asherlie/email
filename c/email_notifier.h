@@ -25,3 +25,4 @@ char* build_MIME(char* subject, char* message, char** attachments, int n_attachm
 int notify(struct notification_message* nm);
 int add_attachment(struct notification_message* nm, char* atch_str);
 int add_reciever(struct notification_message* nm, char* recv_str);
+bool nm_warn(struct notification_message* nm, bool warn);

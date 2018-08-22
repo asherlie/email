@@ -156,3 +156,16 @@ int notify(struct notification_message* nm){
       curl_easy_cleanup(curl);
 	return -1;
 }
+
+bool nm_warn(struct notification_message* nm, bool warn){
+      bool ret = true;
+      if(!nm->email_from_username || !nm->email_from_password){
+            if(warn)puts("username and password are required");
+            ret = false;
+      }
+      if(!nm->n_recievers){
+            if(warn)puts("at least one reciever must be specified");
+            ret = false;
+      }
+      return ret;
+}
