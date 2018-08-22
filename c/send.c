@@ -21,13 +21,12 @@ void p_err(int ret){
 // TODO: fix ridiculous memory leaks
 int main(int argc, char* argv[]){
 	struct notification_message* nm = init_nm(NULL);
-	bool sub_sp = false, msg_sp = false; //sp - specified
       bool snd = false; 
       for(int i = 1; i < argc; ++i){
             if(*argv[i] == '-'){
                   switch(argv[i][1]){
-                        case 's': nm->subject = strdup(argv[i+1]); sub_sp = true; break;
-                        case 'm': nm->message = strdup(argv[i+1]); msg_sp = true; break;
+                        case 's': nm->subject = strdup(argv[i+1]); break;
+                        case 'm': nm->message = strdup(argv[i+1]); break;
                         case 'r': add_reciever(nm, strdup(argv[i+1])); break;
                         case 'a': add_attachment(nm, strdup(argv[i+1])); break;
                         case 'A': memset(auth_filename, '\0', strlen(auth_filename)); strcpy(auth_filename, argv[i+1]); break;
@@ -76,18 +75,17 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-	if(!sub_sp){
+	if(!nm->subject){
 		printf("enter email subject\n");
             size_t sz = 0;
             getline(&nm->subject, &sz, stdin);
 	}
 
-	if(!msg_sp){
+	if(!nm->message){
 		printf("enter email message\n");
             size_t sz = 0;
             getline(&nm->message, &sz, stdin);
 	}
-		
 	if(!nm->n_attachments){
 		printf("enter attachments to send\n");
             char* atch = NULL;
@@ -119,6 +117,7 @@ int main(int argc, char* argv[]){
 		nm->email_from_username = auth_info[0];
 		nm->email_from_password = auth_info[1];
 	}
+      if(!nm_warn(nm, true))return 1;
 	int ret = notify(nm);
       p_err(ret);
       free_nm(nm);
