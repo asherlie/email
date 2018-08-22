@@ -74,13 +74,11 @@ int main(int argc, char* argv[]){
 			nm->recievers[i] = rec_tmp;
 		}
 	}
-
 	if(!nm->subject){
 		printf("enter email subject\n");
             size_t sz = 0;
             getline(&nm->subject, &sz, stdin);
 	}
-
 	if(!nm->message){
 		printf("enter email message\n");
             size_t sz = 0;
@@ -88,20 +86,19 @@ int main(int argc, char* argv[]){
 	}
 	if(!nm->n_attachments){
 		printf("enter attachments to send\n");
-            char* atch = NULL;
             size_t sz = 0;
             ssize_t read = 0;
 		for(int i = 0; i < MAX_ATTACHMENT_NUM; ++i){
+                  char* atch = NULL;
                   read = getline(&atch, &sz, stdin);
                   if(atch[read-1] == '\n')atch[read-1] = '\0';
-			if(strcmp(atch, "") == 0)break;
+			if(read <= 1)break;
 			if(file_exists(atch)){
-				nm->attachments[i] = atch; //consider switching to global var at, so that these do not overwrite previously declared attachments from flags
+                        add_attachment(nm, atch);
 				printf("File will be added to upload list\n");
-				printf("\ncurrent upload list is: \n");
-				for(int j = 0; j <= i; ++j){
+				printf("\ncurrent upload list is:\n");
+				for(int j = 0; j <= i; ++j)
                               printf("%s : %i MB\n", nm->attachments[j], filesize(nm->attachments[j]));
-				}
 			}
 			else{
 				printf("enter file that exists\n");
@@ -122,5 +119,4 @@ int main(int argc, char* argv[]){
       p_err(ret);
       free_nm(nm);
 	return ret;
-	
 }
