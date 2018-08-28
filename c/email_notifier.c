@@ -109,8 +109,8 @@ char* f_to_b64(char* file, int* fsz){
       return b64;
 }
 
+// similar to stpcpy - returns a pointer to the last char of dest that src is copied into
 char* ashcpy(char* dest, char* src){
-      /*for(char* i = src; *i != '\0'; ++i){*/
       int i;
       for(i = 0; src[i] != 0; ++i){
             dest[i] = src[i];
@@ -122,18 +122,13 @@ char* build_MIME(char* subject, char* message, char** attachments, int n_attachm
       int cap = 10000, sz = 300;
       char* contents = calloc(sizeof(char), cap);
       sprintf(contents, "Content-Type: multipart/mixed; boundary=adkkibiowiejdkjbazZDJKOIe\nSubject: %s\n--adkkibiowiejdkjbazZDJKOIe\nContent-Type: multipart/alternative; boundary=adkkibiowiejdkjbazZDJKOIe1\n--adkkibiowiejdkjbazZDJKOIe1\n Content-Type: text/plain; charset=UTF-8\n\n%s\n--adkkibiowiejdkjbazZDJKOIe1--\n" , subject, message);
-
-	/*char* b64_file;*/
 	//adding attachments encoded in base64 to MIME format
 	for(int i = 0; i < n_attachments; ++i){ 
-            printf("adding %s\n", attachments[i]);
             // TODO: implement base64 library method of MIME encoding
             // TODO: use ifdef to detect LIB_B64 macro
             char tmp_cont[4096];
             char* tpp = tmp_cont;
-            /*sprintf(tmp_cont, "\n--adkkibiowiejdkjbazZDJKOIe\nContent-Type: application/octet-stream; name=\"%s\"\nContent-Transfer-Encoding: Base64\nContent-Disposition: attachment; filename=\"%s\"\n", attachments[i], attachments[i]);*/
             tpp = ashcpy(ashcpy(ashcpy(ashcpy(ashcpy(tpp, "\n--adkkibiowiejdkjbazZDJKOIe\nContent-Type: application/octet-stream; name=\""), attachments[i]), "\"\nContent-Transfer-Encoding: Base64\nContent-Disposition: attachment; filename=\""), attachments[i]), "\"\n");
-            
             int bsz;
             char* b64 = f_to_b64(attachments[i], &bsz);
             while(sz+tpp-tmp_cont+bsz >= cap){
@@ -144,23 +139,21 @@ char* build_MIME(char* subject, char* message, char** attachments, int n_attachm
                   contents = tmp;
             }
             sz += bsz;
-            // TODO: stop using strcat
-            strcat(contents, tmp_cont);
-            strcat(contents, b64);
+            ashcpy(ashcpy(contents, tmp_cont), b64);
             free(b64);
 	}
       strcat(contents, "\n--adkkibiowiejdkjbazZDJKOIe--\n");
 	return contents;
 }
 
-/*getting a seg fault from here when using sn as an attachment*/
 int notify(struct notification_message* nm){
 	char** good_attachments = calloc(sizeof(char*), MAX_ATTACHMENT_NUM+1);
       int c = 0; int size_so_far = 0; int tmp_size = 0;
       for(int i = 0; i < nm->n_attachments; ++i){
             if(file_exists(nm->attachments[i])){
                   tmp_size = filesize(nm->attachments[i]);
-			if(tmp_size + size_so_far <= MAX_ATTACHMENT_SIZE){ //if i can spare some MB's 
+                   // if we can spare some MB's 
+			if(tmp_size + size_so_far <= MAX_ATTACHMENT_SIZE){
 				size_so_far += tmp_size; 
                         good_attachments[c++] = nm->attachments[i];
 			}
