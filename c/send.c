@@ -71,7 +71,7 @@ int main(int argc, char* argv[]){
 		for(int i = 0; i < MAX_RECVRS; ++i){
                   getline(&rec_tmp, &sz, stdin);
 			if(strcmp(rec_tmp, "\n") == 0)break;
-			nm->recievers[i] = rec_tmp;
+                  add_reciever(nm, rec_tmp);
 		}
 	}
 	if(!nm->subject){

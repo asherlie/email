@@ -112,9 +112,7 @@ char* f_to_b64(char* file, int* fsz){
 // similar to stpcpy - returns a pointer to the last char of dest that src is copied into
 char* ashcpy(char* dest, char* src){
       int i;
-      for(i = 0; src[i] != 0; ++i){
-            dest[i] = src[i];
-      }
+      for(i = 0; src[i] != 0; ++i)dest[i] = src[i];
       return dest+i;
 }
 
@@ -142,6 +140,7 @@ char* build_MIME(char* subject, char* message, char** attachments, int n_attachm
             ashcpy(ashcpy(contents, tmp_cont), b64);
             free(b64);
 	}
+      // TODO: use ashcpy in favor of strcat
       strcat(contents, "\n--adkkibiowiejdkjbazZDJKOIe--\n");
 	return contents;
 }
