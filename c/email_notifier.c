@@ -109,47 +109,45 @@ char* f_to_b64(char* file, int* fsz){
       return b64;
 }
 
+char* ashcpy(char* dest, char* src){
+      /*for(char* i = src; *i != '\0'; ++i){*/
+      int i;
+      for(i = 0; src[i] != 0; ++i){
+            dest[i] = src[i];
+      }
+      return dest+i;
+}
+
 char* build_MIME(char* subject, char* message, char** attachments, int n_attachments){
-      int cap = 10000, sz = 0;
+      int cap = 10000, sz = 300;
       char* contents = calloc(sizeof(char), cap);
       sprintf(contents, "Content-Type: multipart/mixed; boundary=adkkibiowiejdkjbazZDJKOIe\nSubject: %s\n--adkkibiowiejdkjbazZDJKOIe\nContent-Type: multipart/alternative; boundary=adkkibiowiejdkjbazZDJKOIe1\n--adkkibiowiejdkjbazZDJKOIe1\n Content-Type: text/plain; charset=UTF-8\n\n%s\n--adkkibiowiejdkjbazZDJKOIe1--\n" , subject, message);
 
 	/*char* b64_file;*/
 	//adding attachments encoded in base64 to MIME format
 	for(int i = 0; i < n_attachments; ++i){ 
+            printf("adding %s\n", attachments[i]);
             // TODO: implement base64 library method of MIME encoding
             // TODO: use ifdef to detect LIB_B64 macro
             char tmp_cont[4096];
-            // this is never added to contents
-            sprintf(tmp_cont, "\n--adkkibiowiejdkjbazZDJKOIe\nContent-Type: application/octet-stream; name=\"%s\"\nContent-Transfer-Encoding: Base64\nContent-Disposition: attachment; filename=\"%s\"\n", attachments[i], attachments[i]);
+            char* tpp = tmp_cont;
+            /*sprintf(tmp_cont, "\n--adkkibiowiejdkjbazZDJKOIe\nContent-Type: application/octet-stream; name=\"%s\"\nContent-Transfer-Encoding: Base64\nContent-Disposition: attachment; filename=\"%s\"\n", attachments[i], attachments[i]);*/
+            tpp = ashcpy(ashcpy(ashcpy(ashcpy(ashcpy(tpp, "\n--adkkibiowiejdkjbazZDJKOIe\nContent-Type: application/octet-stream; name=\""), attachments[i]), "\"\nContent-Transfer-Encoding: Base64\nContent-Disposition: attachment; filename=\""), attachments[i]), "\"\n");
+            
             int bsz;
             char* b64 = f_to_b64(attachments[i], &bsz);
-            /*if(sz+300+bsz >= cap){*/
-            while(sz+300+bsz >= cap){
+            while(sz+tpp-tmp_cont+bsz >= cap){
                   cap *= 2;
                   char* tmp = calloc(sizeof(char), cap);
-                  // sz is always 0
                   memcpy(tmp, contents, sz);
                   free(contents);
                   contents = tmp;
             }
+            sz += bsz;
             // TODO: stop using strcat
             strcat(contents, tmp_cont);
             strcat(contents, b64);
             free(b64);
-            /*
-             *char cmd[100];
-             *sprintf(cmd, "cat \"%s\" | base64 | cat > .tmp_b64_file_attachment", attachments[i]);
-             */
-            /*system(cmd);*/
-            /*FILE* fp = fopen(".tmp_b64_file_attachment", "r");*/
-            /*
-             *size_t sz = 0;
-             *while(getline(&b64_file, &sz, fp) != EOF){
-             *      strcat(contents, b64_file);
-             *}
-             *system("rm .tmp_b64_file_attachment");
-             */
 	}
       strcat(contents, "\n--adkkibiowiejdkjbazZDJKOIe--\n");
 	return contents;
@@ -197,7 +195,7 @@ int notify(struct notification_message* nm){
 		curl_easy_setopt(curl, CURLOPT_READDATA, FP);
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 		if(!is_viable_nm(nm))return -2;
-		res = curl_easy_perform(curl);
+            res = curl_easy_perform(curl);
 		remove(tmp_file);
             curl_easy_cleanup(curl);
 		return (int)res;
