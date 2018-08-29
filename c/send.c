@@ -66,11 +66,11 @@ int main(int argc, char* argv[]){
 	}
 	if(!nm->n_recievers){
 		printf("enter recievers\n");
-		char* rec_tmp;
+		char* rec_tmp = NULL;
             size_t sz = 0;
 		for(int i = 0; i < MAX_RECVRS; ++i){
                   getline(&rec_tmp, &sz, stdin);
-			if(strcmp(rec_tmp, "\n") == 0)break;
+                  if(*rec_tmp == '\n')break;
                   add_reciever(nm, rec_tmp);
 		}
 	}
