@@ -82,31 +82,37 @@ int filesize(char* fn){
       return sz/1000000;
 }
 
+char* f_to_chp(char* fname, int* fsz){
+      *fsz = 0;
+      FILE* fp = fopen(fname, "r");
+      size_t sz = 0;
+      char* ln = NULL;
+      int cap = 1000;
+      char* file = calloc(sizeof(char), cap);
+      int read;
+      while((read = getline(&ln, &sz, fp)) != EOF){
+            if(*fsz+read >= cap){
+                  cap *= 2;
+                  char* tmp = calloc(sizeof(char), cap);
+                  memcpy(tmp, file, *fsz);
+                  free(file);
+                  file = tmp;
+            }
+            strcpy(file+*fsz, ln);
+            *fsz += read;
+      }
+      fclose(fp);
+      return file;
+}
+
 char* f_to_b64(char* file, int* fsz){
       *fsz = 0;
       char cmd[100];
       sprintf(cmd, "cat \"%s\" | base64 | cat > .tmp_b64_file", file);
       system(cmd);
-      FILE* fp = fopen(".tmp_b64_file", "r");
-      size_t sz = 0;
-      char* b64_file = NULL;
-      ssize_t read;
-      int cap = 1000;
-      char* b64 = calloc(sizeof(char), cap);
-      while((read = getline(&b64_file, &sz, fp)) != EOF){
-            if(*fsz+read >= cap){
-                  cap *= 2;
-                  char* tmp = calloc(sizeof(char), cap);
-                  memcpy(tmp, b64, *fsz);
-                  free(b64);
-                  b64 = tmp;
-            }
-            strcpy(b64+*fsz, b64_file);
-            *fsz += read;
-      }
-      fclose(fp);
+      char* ret = f_to_chp(".tmp_b64_file", fsz);
       system("rm .tmp_b64_file");
-      return b64;
+      return ret;
 }
 
 // similar to stpcpy - returns a pointer to the last char of dest that src is copied into
